@@ -1,4 +1,4 @@
-"""Parser for ESO add-on manifest files."""
+﻿"""Parser for ESO add-on manifest files."""
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,12 +24,16 @@ class AddonManifest:
     """Relevant metadata parsed from an ESO add-on manifest."""
 
     path: Path
+    addon_id: str
     title: str | None
     author: str | None
     version: str | None
     addon_version: int | None
     api_versions: tuple[int, ...]
+    is_library: bool
     dependencies: tuple[Dependency, ...]
+    pc_dependencies: tuple[Dependency, ...]
+    console_dependencies: tuple[Dependency, ...]
     optional_dependencies: tuple[Dependency, ...]
 
 
@@ -85,12 +89,18 @@ def parse_manifest(path: Path) -> AddonManifest:
 
     return AddonManifest(
         path=path,
+        addon_id=path.stem,
         title=metadata.get("Title"),
         author=metadata.get("Author"),
         version=metadata.get("Version"),
         addon_version=addon_version,
         api_versions=api_versions,
+        is_library=metadata.get("IsLibrary", "").casefold() == "true",
         dependencies=_parse_dependencies(metadata.get("DependsOn", "")),
+        pc_dependencies=_parse_dependencies(metadata.get("PCDependsOn", "")),
+        console_dependencies=_parse_dependencies(
+            metadata.get("ConsoleDependsOn", "")
+        ),
         optional_dependencies=_parse_dependencies(
             metadata.get("OptionalDependsOn", "")
         ),
