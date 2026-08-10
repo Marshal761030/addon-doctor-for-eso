@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "addon-doctor-for-eso"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "A privacy-focused local diagnostic tool for The Elder Scrolls Online add-ons."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -13,14 +13,19 @@ authors = [
     { name = "Marshal761030" }
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
-    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Utilities",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Marshal761030/addon-doctor-for-eso"
+Issues = "https://github.com/Marshal761030/addon-doctor-for-eso/issues"
 
 [project.scripts]
 addon-doctor-for-eso = "addon_doctor.cli:main"

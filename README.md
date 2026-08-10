@@ -4,40 +4,95 @@ A privacy-focused local diagnostic tool for The Elder Scrolls Online add-ons.
 
 ## Status
 
-Early development / experimental. The current development snapshot provides read-only scanning, manifest parsing, inventory discovery, dependency diagnostics, and a local text report.
+**v0.1.0 (alpha)** — the first usable public release.
 
-## Goal
+Addon Doctor currently provides read-only scanning, manifest parsing, add-on/library inventory discovery, dependency diagnostics, and a local text report.
 
-Addon Doctor for ESO helps players diagnose common add-on installation and dependency problems without modifying the game client.
+## What it does
 
-Current v0.1 development features:
+- Detects common Windows ESO `AddOns` locations, or accepts a path manually
+- Scans ESO manifest files within the supported nested folder window
+- Reads both `.txt` and `.addon` manifest metadata
+- Indexes add-ons and libraries while preserving duplicate manifest candidates
+- Checks PC `DependsOn` and `PCDependsOn` dependencies
+- Reports missing hard dependencies
+- Reports insufficient `AddOnVersion` values
+- Reports missing optional dependencies separately as warnings
+- Shows duplicate manifest candidates for manual review
+- Generates the report locally in the terminal
 
-- Detect common Windows ESO AddOns locations, or accept a path manually
-- Scan installed add-on manifest files using ESO's documented folder rules
-- Read `.txt` and `.addon` manifest metadata
-- Index add-ons and libraries, preserving duplicate manifest candidates
-- Check `DependsOn` and `PCDependsOn` dependencies on PC
-- Report missing dependencies and insufficient `AddOnVersion` values
-- Report missing optional dependencies separately
-- Generate a local human-readable diagnostic report
+## Privacy and safety
 
-## Run
+Addon Doctor is intentionally local and read-only.
 
-From the repository root:
+It does **not**:
+
+- Require an ESO account or password
+- Access Steam credentials
+- Scan ESO process memory
+- Inject code into the game
+- Delete, move, repair, download, or modify installed add-ons
+- Upload diagnostic data
+- Include telemetry
+
+The current release reads add-on manifest files only for diagnostic purposes.
+
+## Requirements
+
+- Windows
+- Python 3.11 or newer
+
+## Run from the repository
+
+Open PowerShell in the repository root:
 
 ```powershell
 $env:PYTHONPATH="$PWD\src"
 py -B -m addon_doctor
 ```
 
-Or pass the AddOns path explicitly:
+Addon Doctor will try to detect the ESO `live\AddOns` directory automatically.
+
+You can also pass the directory explicitly:
 
 ```powershell
 $env:PYTHONPATH="$PWD\src"
 py -B -m addon_doctor "C:\Users\YourName\Documents\Elder Scrolls Online\live\AddOns"
 ```
 
-The program prints the report to the terminal. It does not write into the ESO AddOns directory.
+The report is printed to the terminal. Addon Doctor does not write into the ESO `AddOns` directory.
+
+## Install as a command-line tool
+
+From the repository root:
+
+```powershell
+py -m pip install .
+```
+
+Then run:
+
+```powershell
+addon-doctor-for-eso
+```
+
+Or provide the AddOns path:
+
+```powershell
+addon-doctor-for-eso "C:\Users\YourName\Documents\Elder Scrolls Online\live\AddOns"
+```
+
+## Understanding the report
+
+Dependency results include:
+
+- `OK` — dependency is installed and any required `AddOnVersion` is satisfied
+- `MISSING` — required dependency was not found
+- `VERSION_TOO_OLD` — dependency exists but its known `AddOnVersion` is below the required minimum
+- `VERSION_UNKNOWN` — a minimum version is required but no usable `AddOnVersion` is available
+- `OPTIONAL_MISSING` — optional dependency is not installed; this is a warning, not a hard dependency failure
+
+The report also lists add-on/library IDs that have multiple manifest candidates so unusual or legacy installations can be reviewed manually.
 
 ## Tests
 
@@ -46,26 +101,15 @@ $env:PYTHONPATH="$PWD\src"
 py -B -m unittest discover -s tests -v
 ```
 
-## Privacy
+## Current limitations
 
-Privacy is a core design requirement.
+v0.1.0 is intentionally conservative:
 
-The planned v0.1:
-
-- Runs locally
-- Does not require an ESO account or password
-- Does not access Steam credentials
-- Does not scan game process memory
-- Does not inject code into the game
-- Does not upload diagnostic data
-- Does not include telemetry
-- Uses read-only diagnostics by default
-
-Sensitive user data will not be intentionally collected or published.
-
-## Safety
-
-The initial version is designed as a read-only diagnostic utility. It does not automatically delete, move, repair, download, or modify installed add-ons.
+- It diagnoses dependency state but does not repair anything automatically
+- Duplicate manifest candidates are reported rather than automatically deleted or resolved
+- Optional dependencies are informational only
+- No GUI is included yet
+- No executable (`.exe`) build is included yet
 
 ## Disclaimer
 
