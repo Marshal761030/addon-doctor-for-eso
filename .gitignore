@@ -1,0 +1,33 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+build/
+dist/
+*.egg-info/
+
+# Test/tool caches
+.pytest_cache/
+.mypy_cache/
+
+# Local diagnostic output
+reports/
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# Windows/macOS metadata
+Thumbs.db
+.DS_Store
