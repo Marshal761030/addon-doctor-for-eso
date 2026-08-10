@@ -1,4 +1,4 @@
-﻿"""ESO add-on manifest inventory discovery."""
+"""Read-only inventory discovery for ESO add-on manifests."""
 
 from collections import defaultdict
 from dataclasses import dataclass
@@ -7,87 +7,94 @@ from pathlib import Path
 from .manifest import AddonManifest, parse_manifest
 
 
-_MANIFEST_SUFFIXES = {".txt", ".addon"}
+_MANIFEST_SUFFIXES = (".addon", ".txt")
+_MAX_MANIFEST_DIRECTORY_DEPTH = 3
 
 
 @dataclass(frozen=True)
 class InventoryEntry:
-    """A manifest discovered within ESO's supported directory depth."""
+    """A discovered ESO manifest candidate."""
 
     manifest: AddonManifest
     relative_path: Path
     top_level_directory: str
-    embedded: bool
+    nested: bool
 
 
-def _manifests_in_directory(directory: Path) -> tuple[Path, ...]:
-    """Return same-name manifest files directly inside one directory."""
-    result: list[Path] = []
-
-    for path in directory.iterdir():
-        if not path.is_file():
-            continue
-
-        if path.suffix.casefold() not in _MANIFEST_SUFFIXES:
-            continue
-
-        if path.stem.casefold() != directory.name.casefold():
-            continue
-
-        result.append(path)
-
-    return tuple(sorted(result, key=lambda path: str(path).casefold()))
-
-
-def find_manifest_paths(addons_dir: Path) -> tuple[Path, ...]:
-    """Find manifests using ESO's two-directory-level discovery rule."""
-    if not addons_dir.is_dir():
-        raise NotADirectoryError(f"AddOns directory not found: {addons_dir}")
-
+def _matching_manifests(directory: Path) -> tuple[Path, ...]:
+    """Return supported same-name manifest files directly in *directory*."""
     paths: list[Path] = []
 
-    level_one = sorted(
-        (path for path in addons_dir.iterdir() if path.is_dir()),
-        key=lambda path: path.name.casefold(),
-    )
-
-    for directory in level_one:
-        paths.extend(_manifests_in_directory(directory))
-
-        level_two = sorted(
-            (path for path in directory.iterdir() if path.is_dir()),
-            key=lambda path: path.name.casefold(),
-        )
-
-        for nested_directory in level_two:
-            paths.extend(_manifests_in_directory(nested_directory))
+    for suffix in _MANIFEST_SUFFIXES:
+        candidate = directory / f"{directory.name}{suffix}"
+        if candidate.is_file():
+            paths.append(candidate)
 
     return tuple(paths)
 
 
-def build_inventory(
-    addons_dir: Path,
-) -> dict[str, tuple[InventoryEntry, ...]]:
-    """Build an ID index while preserving multiple manifest candidates."""
+def _walk_manifest_directories(
+    directory: Path,
+    *,
+    depth: int,
+) -> tuple[Path, ...]:
+    """Return same-name manifests down to ESO's supported nested scan depth."""
+    paths: list[Path] = list(_matching_manifests(directory))
+
+    if depth >= _MAX_MANIFEST_DIRECTORY_DEPTH:
+        return tuple(paths)
+
+    children = sorted(
+        (path for path in directory.iterdir() if path.is_dir()),
+        key=lambda path: path.name.casefold(),
+    )
+    for child in children:
+        paths.extend(_walk_manifest_directories(child, depth=depth + 1))
+
+    return tuple(paths)
+
+
+def find_manifest_paths(addons_dir: Path) -> tuple[Path, ...]:
+    """Find manifests within ESO's documented nested folder scan window.
+
+    The normal manifest lives at AddOns/<AddOn>/<AddOn>.<ext>. ESO's loader
+    also searches two additional folder levels beneath that top-level add-on
+    directory, allowing bundled/nested add-ons and libraries.
+    """
+    if not addons_dir.is_dir():
+        raise NotADirectoryError(f"AddOns directory not found: {addons_dir}")
+
+    paths: list[Path] = []
+    top_level_directories = sorted(
+        (path for path in addons_dir.iterdir() if path.is_dir()),
+        key=lambda path: path.name.casefold(),
+    )
+
+    for directory in top_level_directories:
+        paths.extend(_walk_manifest_directories(directory, depth=1))
+
+    return tuple(paths)
+
+
+def build_inventory(addons_dir: Path) -> dict[str, tuple[InventoryEntry, ...]]:
+    """Build an add-on ID index while preserving duplicate manifest candidates."""
     grouped: defaultdict[str, list[InventoryEntry]] = defaultdict(list)
 
     for path in find_manifest_paths(addons_dir):
         manifest = parse_manifest(path)
         relative_path = path.relative_to(addons_dir)
-
         grouped[manifest.addon_id].append(
             InventoryEntry(
                 manifest=manifest,
                 relative_path=relative_path,
                 top_level_directory=relative_path.parts[0],
-                embedded=len(relative_path.parts) == 3,
+                nested=len(relative_path.parts) > 2,
             )
         )
 
     return {
         addon_id: tuple(entries)
         for addon_id, entries in sorted(
-            grouped.items(),
-            key=lambda item: item[0].casefold(),
+            grouped.items(), key=lambda item: item[0].casefold()
         )
     }

@@ -22,5 +22,8 @@ classifiers = [
     "Topic :: Utilities",
 ]
 
+[project.scripts]
+addon-doctor-for-eso = "addon_doctor.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]

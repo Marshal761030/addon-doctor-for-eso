@@ -4,22 +4,47 @@ A privacy-focused local diagnostic tool for The Elder Scrolls Online add-ons.
 
 ## Status
 
-Early development / experimental.
-
-The project is currently being designed and tested. No stable release is available yet.
+Early development / experimental. The current development snapshot provides read-only scanning, manifest parsing, inventory discovery, dependency diagnostics, and a local text report.
 
 ## Goal
 
-Addon Doctor for ESO aims to help players diagnose common add-on installation and dependency problems without modifying the game client.
+Addon Doctor for ESO helps players diagnose common add-on installation and dependency problems without modifying the game client.
 
-Planned v0.1 features:
+Current v0.1 development features:
 
-- Detect the local ESO AddOns directory
-- Scan installed add-ons
-- Read add-on manifest information
-- Detect missing or unresolved library dependencies
-- Identify common installation problems
-- Generate a local diagnostic report
+- Detect common Windows ESO AddOns locations, or accept a path manually
+- Scan installed add-on manifest files using ESO's documented folder rules
+- Read `.txt` and `.addon` manifest metadata
+- Index add-ons and libraries, preserving duplicate manifest candidates
+- Check `DependsOn` and `PCDependsOn` dependencies on PC
+- Report missing dependencies and insufficient `AddOnVersion` values
+- Report missing optional dependencies separately
+- Generate a local human-readable diagnostic report
+
+## Run
+
+From the repository root:
+
+```powershell
+$env:PYTHONPATH="$PWD\src"
+py -B -m addon_doctor
+```
+
+Or pass the AddOns path explicitly:
+
+```powershell
+$env:PYTHONPATH="$PWD\src"
+py -B -m addon_doctor "C:\Users\YourName\Documents\Elder Scrolls Online\live\AddOns"
+```
+
+The program prints the report to the terminal. It does not write into the ESO AddOns directory.
+
+## Tests
+
+```powershell
+$env:PYTHONPATH="$PWD\src"
+py -B -m unittest discover -s tests -v
+```
 
 ## Privacy
 
@@ -40,9 +65,7 @@ Sensitive user data will not be intentionally collected or published.
 
 ## Safety
 
-The initial version is designed as a read-only diagnostic utility.
-
-Users should always keep backups of important game configuration files before using experimental software.
+The initial version is designed as a read-only diagnostic utility. It does not automatically delete, move, repair, download, or modify installed add-ons.
 
 ## Disclaimer
 
