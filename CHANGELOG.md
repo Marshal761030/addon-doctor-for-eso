@@ -2,6 +2,21 @@
 
 All notable changes to Addon Doctor for ESO will be documented in this file.
 
+## 0.1.1 - 2026-08-11
+
+Packaging and regression-test hardening for the first public alpha.
+
+### Added
+
+- Regression tests for common command-line success and error paths
+- Wheel build and clean-environment installation checks on Windows
+- Post-install smoke tests for both the module and console entry point
+- Direct release-wheel installation instructions
+
+### Changed
+
+- GitHub Actions now validates the built wheel on Python 3.11 through 3.14
+
 ## 0.1.0 - 2026-08-11
 
 First usable alpha release.

@@ -30,3 +30,18 @@ jobs:
 
       - name: Run unit tests
         run: python -B -m unittest discover -s tests -v
+
+      - name: Build wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build --wheel
+
+      - name: Install wheel in a clean environment
+        shell: pwsh
+        run: |
+          python -m venv .venv-smoke
+          .\.venv-smoke\Scripts\python.exe -m pip install --no-index --find-links dist addon-doctor-for-eso==0.1.1
+
+      - name: Smoke-test installed wheel
+        shell: pwsh
+        run: .\.venv-smoke\Scripts\python.exe scripts\wheel_smoke.py

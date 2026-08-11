@@ -4,7 +4,7 @@ A privacy-focused local diagnostic tool for The Elder Scrolls Online add-ons.
 
 ## Status
 
-**v0.1.0 (alpha)** — the first usable public release.
+**v0.1.1 (alpha)** — the current alpha release.
 
 Addon Doctor currently provides read-only scanning, manifest parsing, add-on/library inventory discovery, dependency diagnostics, and a local text report.
 
@@ -64,6 +64,29 @@ The report is printed to the terminal. Addon Doctor does not write into the ESO 
 
 ## Install as a command-line tool
 
+### Install the release wheel
+
+Download `addon_doctor_for_eso-0.1.1-py3-none-any.whl` from the GitHub
+release, open PowerShell in the download directory, and run:
+
+```powershell
+py -m pip install .\addon_doctor_for_eso-0.1.1-py3-none-any.whl
+```
+
+Then run:
+
+```powershell
+addon-doctor-for-eso
+```
+
+You can also provide the AddOns path explicitly:
+
+```powershell
+addon-doctor-for-eso "C:\Users\YourName\Documents\Elder Scrolls Online\live\AddOns"
+```
+
+### Install from the repository
+
 From the repository root:
 
 ```powershell
@@ -103,7 +126,7 @@ py -B -m unittest discover -s tests -v
 
 ## Current limitations
 
-v0.1.0 is intentionally conservative:
+v0.1.1 is intentionally conservative:
 
 - It diagnoses dependency state but does not repair anything automatically
 - Duplicate manifest candidates are reported rather than automatically deleted or resolved
